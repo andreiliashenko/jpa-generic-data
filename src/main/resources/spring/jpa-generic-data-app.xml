@@ -13,7 +13,8 @@
     <context:annotation-config />
 
     <context:component-scan base-package="com.anli.generalization.data.access.beans,
-        com.anli.generalization.data.access.metadata.beans" />
+        com.anli.generalization.data.access.metadata.beans,
+        com.anli.generalization.data.access.internal.beans" />
 
     <tx:annotation-driven proxy-target-class="true" />
 
