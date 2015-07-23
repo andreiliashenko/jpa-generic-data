@@ -8,6 +8,7 @@ import com.anli.generalization.data.entities.metadata.jpa.JpaObjectType;
 import com.anli.generalization.data.entities.proxy.DataObjectProxy;
 import com.anli.generalization.data.entities.proxy.DataObjectProxyBuilder;
 import java.math.BigInteger;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
@@ -17,6 +18,7 @@ public class DataObjectProxyManager
     protected final DataObjectProxyBuilder proxyBuilder;
     protected final DataObjectManager dataObjectManager;
 
+    @Inject
     public DataObjectProxyManager(DataObjectProxyBuilder proxyBuilder,
             DataObjectManager dataObjectManager) {
         this.proxyBuilder = proxyBuilder;
