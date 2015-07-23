@@ -19,6 +19,6 @@
 
     <tx:annotation-driven proxy-target-class="true" />
 
-    <bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager" />
+    <tx:jta-transaction-manager />
 
 </beans>
