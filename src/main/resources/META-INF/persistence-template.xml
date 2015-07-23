@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-  <persistence-unit name="generalization" transaction-type="JTA">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <!-- <jta-data-source>java:/jdbc/generalization</jta-data-source> -->
-    <jta-data-source>java:/jdbc/integration_testing</jta-data-source>
-    <validation-mode>NONE</validation-mode>
-  </persistence-unit>
+    <persistence-unit name="generalization" transaction-type="JTA">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <!-- <jta-data-source>java:/jdbc/generalization</jta-data-source> -->
+        <jta-data-source>java:/jdbc/integration_testing</jta-data-source>
+        <validation-mode>NONE</validation-mode>
+        <class>com.anli.generalization.data.entities.jpa.ChildrenGroup</class>
+        <class>com.anli.generalization.data.entities.jpa.JpaDataObject</class>
+        <class>com.anli.generalization.data.entities.metadata.jpa.JpaAttribute</class>
+        <class>com.anli.generalization.data.entities.metadata.jpa.JpaListEntry</class>
+        <class>com.anli.generalization.data.entities.metadata.jpa.JpaObjectType</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.DateValue</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.ListValue</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.Parameter</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.ParameterValue</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.ReferenceValue</class>
+        <class>com.anli.generalization.data.entities.parameter.jpa.TextValue</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="eclipselink.target-server" value="JBoss" />
+        </properties>
+    </persistence-unit>
 </persistence>
