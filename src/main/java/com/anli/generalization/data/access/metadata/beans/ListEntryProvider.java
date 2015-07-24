@@ -1,6 +1,6 @@
 package com.anli.generalization.data.access.metadata.beans;
 
-import com.anli.generalization.data.access.beans.GenericManager;
+import com.anli.generalization.data.access.beans.GenericProvider;
 import com.anli.generalization.data.entities.metadata.ListEntry;
 import com.anli.generalization.data.entities.metadata.jpa.JpaListEntry;
 import java.math.BigInteger;
@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Named
-public class ListEntryManager extends GenericManager<JpaListEntry>
-        implements com.anli.generalization.data.access.metadata.ListEntryManager {
+public class ListEntryProvider extends GenericProvider<JpaListEntry>
+        implements com.anli.generalization.data.access.metadata.ListEntryProvider {
 
     @Override
     protected Class<JpaListEntry> getEntityClass() {

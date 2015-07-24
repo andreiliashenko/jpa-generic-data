@@ -1,6 +1,6 @@
 package com.anli.generalization.data.access.metadata.beans;
 
-import com.anli.generalization.data.access.beans.GenericManager;
+import com.anli.generalization.data.access.beans.GenericProvider;
 import com.anli.generalization.data.entities.metadata.Attribute;
 import com.anli.generalization.data.entities.metadata.jpa.JpaAttribute;
 import java.math.BigInteger;
@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Named
-public class AttributeManager extends GenericManager<JpaAttribute>
-        implements com.anli.generalization.data.access.metadata.AttributeManager {
+public class AttributeProvider extends GenericProvider<JpaAttribute>
+        implements com.anli.generalization.data.access.metadata.AttributeProvider {
 
     @Override
     protected Class<JpaAttribute> getEntityClass() {

@@ -1,6 +1,6 @@
 package com.anli.generalization.data.access.internal.beans;
 
-import com.anli.generalization.data.access.beans.JpaManager;
+import com.anli.generalization.data.access.beans.JpaProvider;
 import com.anli.generalization.data.entities.jpa.ChildrenGroup;
 import com.anli.generalization.data.entities.metadata.AttributeType;
 import com.anli.generalization.data.entities.parameter.jpa.DateValue;
@@ -19,7 +19,7 @@ import static com.anli.generalization.data.entities.metadata.AttributeType.TEXT;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Named
-public class SecondaryEntitesFactory extends JpaManager {
+public class SecondaryEntitesFactory extends JpaProvider {
 
     @Transactional(propagation = MANDATORY)
     public ParameterValue createParameterValue(AttributeType type) {

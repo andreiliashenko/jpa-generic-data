@@ -1,6 +1,6 @@
 package com.anli.generalization.data.access.metadata.beans;
 
-import com.anli.generalization.data.access.beans.GenericManager;
+import com.anli.generalization.data.access.beans.GenericProvider;
 import com.anli.generalization.data.entities.metadata.ObjectType;
 import com.anli.generalization.data.entities.metadata.jpa.JpaObjectType;
 import java.math.BigInteger;
@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
 @Named
-public class ObjectTypeManager extends GenericManager<JpaObjectType>
-        implements com.anli.generalization.data.access.metadata.ObjectTypeManager {
+public class ObjectTypeProvider extends GenericProvider<JpaObjectType>
+        implements com.anli.generalization.data.access.metadata.ObjectTypeProvider {
 
     @Override
     protected Class<JpaObjectType> getEntityClass() {

@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.transaction.annotation.Propagation.MANDATORY;
 
-public abstract class GenericManager<E extends JpaObject> extends JpaManager {
+public abstract class GenericProvider<E extends JpaObject> extends JpaProvider {
 
     protected abstract Class<E> getEntityClass();
 

@@ -3,7 +3,7 @@ package com.anli.generalization.data.access.beans;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-public class JpaManager {
+public class JpaProvider {
 
     @PersistenceContext(unitName = "generalization")
     protected EntityManager manager;

@@ -1,6 +1,6 @@
 package com.anli.generalization.data.access.beans;
 
-import com.anli.generalization.data.access.internal.beans.DataObjectManager;
+import com.anli.generalization.data.access.internal.beans.DataObjectProvider;
 import com.anli.generalization.data.entities.DataObject;
 import com.anli.generalization.data.entities.jpa.JpaDataObject;
 import com.anli.generalization.data.entities.metadata.ObjectType;
@@ -12,15 +12,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named
-public class DataObjectProxyManager
-        implements com.anli.generalization.data.access.DataObjectManager {
+public class DataObjectProxyProvider
+        implements com.anli.generalization.data.access.DataObjectProvider {
 
     protected final DataObjectProxyBuilder proxyBuilder;
-    protected final DataObjectManager dataObjectManager;
+    protected final DataObjectProvider dataObjectManager;
 
     @Inject
-    public DataObjectProxyManager(DataObjectProxyBuilder proxyBuilder,
-            DataObjectManager dataObjectManager) {
+    public DataObjectProxyProvider(DataObjectProxyBuilder proxyBuilder,
+            DataObjectProvider dataObjectManager) {
         this.proxyBuilder = proxyBuilder;
         this.dataObjectManager = dataObjectManager;
     }
