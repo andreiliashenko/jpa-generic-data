@@ -26,5 +26,7 @@
             <bean class="org.springframework.instrument.classloading.jboss.JBossLoadTimeWeaver"/>
         </property>
     </bean>
+    
+    <bean class="com.anli.jpa.jta.injection.JtaPersistenceContextProcessor" />
 
 </beans>

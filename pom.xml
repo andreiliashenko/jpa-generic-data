@@ -95,6 +95,11 @@
             <artifactId>generic-data</artifactId>
             <version>0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.anli</groupId>
+            <artifactId>jpa-jta-spring-extension</artifactId>
+            <version>0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
