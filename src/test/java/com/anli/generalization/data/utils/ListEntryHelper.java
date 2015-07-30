@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
@@ -13,16 +14,18 @@ import static java.util.Arrays.asList;
 
 public class ListEntryHelper extends SqlHelper {
 
-    public ListEntryHelper(DataSource dataSource) {
-        super(dataSource);
-    }
-
     private static final String INSERT_LIST_ENTRY = "insert into list_entries "
             + "(list_entry_id, entry_value) values (?, ?)";
-    private static final String LINK_LIST_ENTRY_TO_ATTRIBUTE = "updata list_entries "
+    private static final String LINK_LIST_ENTRY_TO_ATTRIBUTE = "update list_entries "
             + "set attribute_id = ?, attribute_order = ? where list_entry_id = ?";
     private static final String SELECT_LIST_ENTRY = "select list_entry_id, entry_value, "
             + "attribute_id, attribute_order from list_entries where list_entry_id = ?";
+    private static final String SELECT_ENTRY_IDS_BY_ATTR = "select list_entry_id from list_entries "
+            + "where attribute_id = ? order by attribute_order";
+
+    public ListEntryHelper(DataSource dataSource) {
+        super(dataSource);
+    }
 
     public void createListEntry(long id, String entryValue) {
         executor.executeUpdate(INSERT_LIST_ENTRY, asList(id, entryValue));
@@ -36,6 +39,11 @@ public class ListEntryHelper extends SqlHelper {
 
     public Map<String, Object> readListEntry(BigInteger id) {
         return executor.executeSelect(SELECT_LIST_ENTRY, asList(new BigDecimal(id)), new ListEntryReader());
+    }
+
+    public List<BigInteger> readEntriesByAttribute(BigInteger attrId) {
+        return executor.executeSelect(SELECT_ENTRY_IDS_BY_ATTR, asList(new BigDecimal(attrId)),
+                new IdSelector());
     }
 
     protected class ListEntryReader implements ResultSetHandler<Map<String, Object>> {
