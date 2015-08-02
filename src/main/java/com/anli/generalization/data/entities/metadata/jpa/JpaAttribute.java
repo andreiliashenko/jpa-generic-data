@@ -5,6 +5,7 @@ import com.anli.generalization.data.entities.metadata.Attribute;
 import com.anli.generalization.data.entities.metadata.AttributeType;
 import com.anli.generalization.data.entities.metadata.ListEntry;
 import com.anli.generalization.data.entities.metadata.ObjectType;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -42,6 +43,10 @@ public class JpaAttribute extends JpaObject implements Attribute {
     @JoinColumn(name = "attribute_id", referencedColumnName = "attribute_id")
     @OrderColumn(name = "attribute_order")
     protected List<JpaListEntry> listEntries;
+
+    public JpaAttribute() {
+        this.listEntries = new ArrayList<>();
+    }
 
     @Override
     public AttributeType getType() {

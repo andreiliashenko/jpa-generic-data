@@ -3,6 +3,7 @@ package com.anli.generalization.data.entities.jpa;
 import com.anli.generalization.data.entities.parameter.jpa.Parameter;
 import com.anli.generalization.data.entities.metadata.jpa.JpaObjectType;
 import com.anli.generalization.data.entities.metadata.jpa.JpaAttribute;
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -46,6 +47,11 @@ public class JpaDataObject extends JpaObject {
             joinColumns = @JoinColumn(name = "children_group_id", referencedColumnName = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "parent_id", referencedColumnName = "object_id"))
     protected JpaDataObject parent;
+
+    public JpaDataObject() {
+        this.childrenGroups = new HashMap<>();
+        this.parameters = new HashMap<>();
+    }
 
     public String getName() {
         return name;

@@ -3,7 +3,9 @@ package com.anli.generalization.data.entities.metadata.jpa;
 import com.anli.generalization.data.entities.jpa.JpaObject;
 import com.anli.generalization.data.entities.metadata.Attribute;
 import com.anli.generalization.data.entities.metadata.ObjectType;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -36,6 +38,11 @@ public class JpaObjectType extends JpaObject implements ObjectType {
     @JoinColumn(name = "object_type_id", referencedColumnName = "object_type_id")
     @OrderColumn(name = "object_type_order")
     protected List<JpaAttribute> attributes;
+
+    public JpaObjectType() {
+        this.children = new HashSet<>();
+        this.attributes = new ArrayList<>();
+    }
 
     @Override
     public ObjectType getParent() {

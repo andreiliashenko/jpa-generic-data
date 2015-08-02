@@ -1,6 +1,7 @@
 package com.anli.generalization.data.entities.parameter.jpa;
 
 import com.anli.generalization.data.entities.jpa.JpaObject;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -21,6 +22,10 @@ public class Parameter extends JpaObject {
     @JoinColumn(name = "parameter_id", referencedColumnName = "parameter_id")
     @OrderColumn(name = "parameter_order")
     protected List<ParameterValue> parameterValues;
+
+    public Parameter() {
+        this.parameterValues = new ArrayList<>();
+    }
 
     public <T extends ParameterValue> List<T> getParameterValues() {
         return (List) parameterValues;
