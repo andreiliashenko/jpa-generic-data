@@ -22,22 +22,22 @@ public class JpaProviderFactory implements ProviderFactory {
     }
 
     @Override
-    public DataObjectProvider getDataObjectManager() {
+    public DataObjectProvider getDataObjectProvider() {
         return getBean(DataObjectProvider.class);
     }
 
     @Override
-    public AttributeProvider getAttributeManager() {
+    public AttributeProvider getAttributeProvider() {
         return getBean(AttributeProvider.class);
     }
 
     @Override
-    public ObjectTypeProvider getObjectTypeManager() {
+    public ObjectTypeProvider getObjectTypeProvider() {
         return getBean(ObjectTypeProvider.class);
     }
 
     @Override
-    public ListEntryProvider getListEntryManager() {
+    public ListEntryProvider getListEntryProvider() {
         return getBean(ListEntryProvider.class);
     }
 

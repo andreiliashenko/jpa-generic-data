@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.springframework.transaction.IllegalTransactionStateException;
 
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
+import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -44,7 +45,7 @@ public class ListEntryTest {
     @Before
     public void setUp() {
         helper = new ListEntryHelper(dataSource);
-        provider = JpaProviderFactory.getInstance().getListEntryManager();
+        provider = JpaProviderFactory.getInstance().getListEntryProvider();
     }
 
     @Test
@@ -113,23 +114,23 @@ public class ListEntryTest {
     @Test
     @InSequence(4)
     public void testReading_shouldReadWithoutEdit() throws Exception {
-        helper.createListEntry(1001, "readed value");
+        helper.createListEntry(1001, "read value");
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1001));
+        ListEntry entry = provider.getById(bi(1001));
         BigInteger id = entry.getId();
         String value = entry.getEntryValue();
 
         transaction.commit();
 
-        assertEquals(BigInteger.valueOf(1001), id);
-        assertEquals("readed value", value);
+        assertEquals(bi(1001), id);
+        assertEquals("read value", value);
 
-        Map<String, Object> entryData = helper.readListEntry(BigInteger.valueOf(1001));
+        Map<String, Object> entryData = helper.readListEntry(bi(1001));
 
-        assertEquals(BigInteger.valueOf(1001), entryData.get("id"));
-        assertEquals("readed value", entryData.get("entryValue"));
+        assertEquals(bi(1001), entryData.get("id"));
+        assertEquals("read value", entryData.get("entryValue"));
         assertNull(entryData.get("attribute"));
         assertNull(entryData.get("order"));
     }
@@ -139,7 +140,7 @@ public class ListEntryTest {
     public void testReading_shouldReadNull() throws Exception {
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1002));
+        ListEntry entry = provider.getById(bi(1002));
 
         transaction.commit();
 
@@ -150,7 +151,7 @@ public class ListEntryTest {
     @InSequence(6)
     public void testReading_shouldForbidNonTransactionalCall() {
         helper.createListEntry(1003, "created value");
-        provider.getById(BigInteger.valueOf(1003));
+        provider.getById(bi(1003));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -170,14 +171,14 @@ public class ListEntryTest {
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1004));
+        ListEntry entry = provider.getById(bi(1004));
         entry.setEntryValue("updated value");
 
         transaction.commit();
 
-        Map<String, Object> entryData = helper.readListEntry(BigInteger.valueOf(1004));
+        Map<String, Object> entryData = helper.readListEntry(bi(1004));
 
-        assertEquals(BigInteger.valueOf(1004), entryData.get("id"));
+        assertEquals(bi(1004), entryData.get("id"));
         assertEquals("updated value", entryData.get("entryValue"));
         assertNull(entryData.get("attribute"));
         assertNull(entryData.get("order"));
@@ -190,14 +191,14 @@ public class ListEntryTest {
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1005));
+        ListEntry entry = provider.getById(bi(1005));
         entry.setEntryValue("updated value");
 
         transaction.rollback();
 
-        Map<String, Object> entryData = helper.readListEntry(BigInteger.valueOf(1005));
+        Map<String, Object> entryData = helper.readListEntry(bi(1005));
 
-        assertEquals(BigInteger.valueOf(1005), entryData.get("id"));
+        assertEquals(bi(1005), entryData.get("id"));
         assertEquals("initial value", entryData.get("entryValue"));
         assertNull(entryData.get("attribute"));
         assertNull(entryData.get("order"));
@@ -210,13 +211,13 @@ public class ListEntryTest {
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1006));
+        ListEntry entry = provider.getById(bi(1006));
         entry.setEntryValue("updatedValue");
         provider.remove(entry);
 
         transaction.commit();
 
-        Map<String, Object> data = helper.readListEntry(BigInteger.valueOf(1006));
+        Map<String, Object> data = helper.readListEntry(bi(1006));
 
         assertNull(data);
     }
@@ -228,14 +229,14 @@ public class ListEntryTest {
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1007));
+        ListEntry entry = provider.getById(bi(1007));
         provider.remove(entry);
 
         transaction.rollback();
 
-        Map<String, Object> entryData = helper.readListEntry(BigInteger.valueOf(1007));
+        Map<String, Object> entryData = helper.readListEntry(bi(1007));
 
-        assertEquals(BigInteger.valueOf(1007), entryData.get("id"));
+        assertEquals(bi(1007), entryData.get("id"));
         assertEquals("rollback remove value", entryData.get("entryValue"));
         assertNull(entryData.get("attribute"));
         assertNull(entryData.get("order"));
@@ -248,7 +249,7 @@ public class ListEntryTest {
 
         transaction.begin();
 
-        ListEntry entry = provider.getById(BigInteger.valueOf(1008));
+        ListEntry entry = provider.getById(bi(1008));
 
         transaction.commit();
 
