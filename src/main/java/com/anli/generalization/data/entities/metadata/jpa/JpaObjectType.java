@@ -27,8 +27,7 @@ public class JpaObjectType extends JpaObject implements ObjectType {
     @JoinColumn(name = "parent_type_id", referencedColumnName = "object_type_id")
     protected JpaObjectType parent;
 
-    @OneToMany(fetch = LAZY)
-    @JoinColumn(name = "parent_type_id", referencedColumnName = "object_type_id")
+    @OneToMany(fetch = LAZY, mappedBy = "parent")
     protected Collection<JpaObjectType> children;
 
     @Column(name = "name")
@@ -47,6 +46,14 @@ public class JpaObjectType extends JpaObject implements ObjectType {
     @Override
     public ObjectType getParent() {
         return parent;
+    }
+
+    @Override
+    public void setParent(ObjectType parent) {
+        this.parent = (JpaObjectType) parent;
+        if (parent != null) {
+            parent.getChildren().add(this);
+        }
     }
 
     @Override

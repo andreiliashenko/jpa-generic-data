@@ -28,7 +28,7 @@ public class ObjectTypeProvider extends GenericProvider<JpaObjectType>
     public ObjectType create(ObjectType parentType) {
         JpaObjectType type = createEntity();
         if (parentType != null) {
-            parentType.getChildren().add(type);
+            type.setParent(parentType);
         }
         return type;
     }
