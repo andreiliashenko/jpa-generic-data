@@ -23,7 +23,6 @@ import org.springframework.transaction.IllegalTransactionStateException;
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
 import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -112,7 +111,7 @@ public class ObjectTypeTest {
             fail();
             return;
         }
-        assertTrue(parentChildren.size() == 1);
+        assertEquals(1, parentChildren.size());
         assertSame(type, parentChild);
         assertSame(childA, collectionChildA);
         assertSame(childB, collectionChildB);
@@ -141,12 +140,12 @@ public class ObjectTypeTest {
 
         Collection<BigInteger> parentChildrenIds = helper.readObjectTypesByParent(bi(1101));
 
-        assertTrue(parentChildrenIds.size() == 1);
+        assertEquals(1, parentChildrenIds.size());
         assertEquals(id, parentChildrenIds.iterator().next());
 
         Collection<BigInteger> typeChildrenIds = helper.readObjectTypesByParent(id);
 
-        assertTrue(typeChildrenIds.size() == 2);
+        assertEquals(2, typeChildrenIds.size());
         assertTrue(typeChildrenIds.contains(bi(1102)));
         assertTrue(typeChildrenIds.contains(bi(1103)));
     }
@@ -226,9 +225,9 @@ public class ObjectTypeTest {
         Collection<ObjectType> children = type.getChildren();
 
         assertNull(parentParent);
-        assertTrue(parentChildren.size() == 1);
+        assertEquals(1, parentChildren.size());
         assertSame(type, parentChildren.iterator().next());
-        assertTrue(children.size() == 2);
+        assertEquals(2, children.size());
 
         ObjectType childA = null;
         ObjectType childB = null;
@@ -297,12 +296,12 @@ public class ObjectTypeTest {
 
         Collection<BigInteger> parentChildrenIds = helper.readObjectTypesByParent(bi(1107));
 
-        assertTrue(parentChildrenIds.size() == 1);
+        assertEquals(1, parentChildrenIds.size());
         assertEquals(bi(1110), parentChildrenIds.iterator().next());
 
         Collection<BigInteger> typeChildrenIds = helper.readObjectTypesByParent(bi(1110));
 
-        assertTrue(typeChildrenIds.size() == 2);
+        assertEquals(2, typeChildrenIds.size());
         assertTrue(typeChildrenIds.contains(bi(1108)));
         assertTrue(typeChildrenIds.contains(bi(1109)));
     }
@@ -398,7 +397,7 @@ public class ObjectTypeTest {
         Collection<BigInteger> childAChildrenIds = helper.readObjectTypesByParent(bi(1113));
         Collection<BigInteger> childBChildrenIds = helper.readObjectTypesByParent(bi(1114));
 
-        assertTrue(parentChildrenIds.size() == 2);
+        assertEquals(2, parentChildrenIds.size());
         assertTrue(parentChildrenIds.contains(bi(1114)));
         assertTrue(parentChildrenIds.contains(bi(1115)));
         assertTrue(childrenIds.isEmpty());
@@ -467,9 +466,9 @@ public class ObjectTypeTest {
         Collection<BigInteger> childAChildrenIds = helper.readObjectTypesByParent(bi(1117));
         Collection<BigInteger> childBChildrenIds = helper.readObjectTypesByParent(bi(1118));
 
-        assertTrue(parentChildrenIds.size() == 1);
+        assertEquals(1, parentChildrenIds.size());
         assertEquals(bi(1119), parentChildrenIds.iterator().next());
-        assertTrue(childrenIds.size() == 2);
+        assertEquals(2, childrenIds.size());
         assertTrue(childrenIds.contains(bi(1117)));
         assertTrue(childrenIds.contains(bi(1118)));
         assertTrue(childAChildrenIds.isEmpty());
@@ -572,9 +571,9 @@ public class ObjectTypeTest {
         Collection<BigInteger> childAChildrenIds = helper.readObjectTypesByParent(bi(1126));
         Collection<BigInteger> childBChildrenIds = helper.readObjectTypesByParent(bi(1127));
 
-        assertTrue(parentChildrenIds.size() == 1);
+        assertEquals(1, parentChildrenIds.size());
         assertEquals(bi(1128), parentChildrenIds.iterator().next());
-        assertTrue(childrenIds.size() == 2);
+        assertEquals(2, childrenIds.size());
         assertTrue(childrenIds.contains(bi(1126)));
         assertTrue(childrenIds.contains(bi(1127)));
         assertTrue(childAChildrenIds.isEmpty());
