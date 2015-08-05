@@ -1,7 +1,7 @@
 set foreign_key_checks = 0;
 
 drop table if exists 
-    id_generation_sequences, parameter_values, parameters, children_groups, 
+    parameter_values, parameters, children_groups, 
     data_objects, list_entries, attributes, object_types;
 
 set foreign_key_checks = 1;
@@ -108,7 +108,7 @@ create table parameter_values (
         on delete set null on update cascade
 ) engine=innodb default charset=utf8;
 
-create table id_generation_sequences (
+create table if not exists id_generation_sequences (
     entity_set varchar(20) not null,
     last_id bigint(20) unsigned default null,
     primary key (entity_set),
@@ -118,4 +118,6 @@ create table id_generation_sequences (
 insert into
     id_generation_sequences (entity_set, last_id)
 values
-    ('data', 1000000000000000000);
+    ('data', 1000000000000000000)
+on duplicate key update
+    last_id = 1000000000000000000;
