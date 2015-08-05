@@ -27,6 +27,6 @@
         </property>
     </bean>
     
-    <bean class="com.anli.jpa.jta.injection.JtaPersistenceContextProcessor" />
+    <bean class="com.anli.jpa.jta.spring.JtaPersistenceContextProcessor" />
 
 </beans>

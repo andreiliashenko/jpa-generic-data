@@ -97,7 +97,7 @@
         </dependency>
         <dependency>
             <groupId>com.anli</groupId>
-            <artifactId>jpa-jta-spring-extension</artifactId>
+            <artifactId>jpa-jta-extensions</artifactId>
             <version>0.1</version>
         </dependency>
 
