@@ -136,7 +136,7 @@
         </dependency>
         <dependency>
             <groupId>com.anli</groupId>
-            <artifactId>SqlExecution</artifactId>
+            <artifactId>sql-execution</artifactId>
             <version>0.5</version>
             <scope>test</scope>
         </dependency>
