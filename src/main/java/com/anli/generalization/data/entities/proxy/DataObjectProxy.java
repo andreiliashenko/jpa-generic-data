@@ -10,6 +10,7 @@ import com.anli.generalization.data.entities.metadata.jpa.JpaAttribute;
 import com.anli.generalization.data.entities.metadata.jpa.JpaObjectType;
 import com.anli.generalization.data.entities.parameter.jpa.Parameter;
 import com.anli.generalization.data.entities.parameter.jpa.ParameterValue;
+import com.google.common.base.Function;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
@@ -20,12 +21,16 @@ import javax.inject.Named;
 import org.springframework.context.annotation.Scope;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 
 @Named
 @Scope("prototype")
 public class DataObjectProxy implements DataObject {
+
+    protected static final ValueExtractor VALUE_EXTRACTOR = new ValueExtractor();
 
     protected final DataObjectProxyBuilder proxyBuilder;
     protected final SecondaryEntitesFactory secondaryEntitiesFactory;
@@ -73,13 +78,18 @@ public class DataObjectProxy implements DataObject {
     }
 
     @Override
+    public ObjectType getObjectType() {
+        return proxiedObject.getObjectType();
+    }
+
+    @Override
     public DataObject getParent() {
         return proxyBuilder.getProxy(proxiedObject.getParent());
     }
 
     @Override
     public Collection<DataObject> getChildren(ObjectType objectType, boolean hierarchically) {
-        checkNotNull(objectType, "Object type for search cannot be null");
+        checkArgument(objectType != null, "Object type for search cannot be null");
         List<ChildrenGroup> groups = new LinkedList<>();
         ObjectType currentType = objectType;
         while (currentType != null) {
@@ -97,7 +107,7 @@ public class DataObjectProxy implements DataObject {
 
     @Override
     public void addChild(DataObject child) {
-        checkNotNull(child, "Added child cannot be null");
+        checkArgument(child != null, "Added child cannot be null");
         JpaDataObject childObject = ((DataObjectProxy) child).getProxiedObject();
         JpaObjectType childType = childObject.getObjectType();
         ChildrenGroup targetGroup = proxiedObject.getChildrenGroup(childType);
@@ -106,37 +116,47 @@ public class DataObjectProxy implements DataObject {
             proxiedObject.setChildrenGroup(childType, targetGroup);
         }
         targetGroup.getChildren().add(childObject);
+        childObject.setParent(proxiedObject);
     }
 
     @Override
     public void removeChild(DataObject child) {
-        checkNotNull(child, "Removed child can not be null");
+        checkArgument(child != null, "Removed child can not be null");
         JpaDataObject childObject = ((DataObjectProxy) child).getProxiedObject();
         JpaObjectType childType = childObject.getObjectType();
         ChildrenGroup targetGroup = proxiedObject.getChildrenGroup(childType);
         if (targetGroup != null) {
             targetGroup.getChildren().remove(childObject);
+            childObject.setParent(null);
+            if (targetGroup.getChildren().isEmpty()) {
+                proxiedObject.getChildrenGroups().remove(childType);
+            }
         }
     }
 
     @Override
     public <T> T getValue(Attribute attribute) {
-        checkNotNull(attribute, "Attribute of value can not be null");
+        checkArgument(attribute != null, "Attribute of value can not be null");
         Parameter parameter = proxiedObject.getParameter((JpaAttribute) attribute);
         if (parameter == null) {
-            return null;
+            return (T) (attribute.isMultiple() ? emptyList() : null);
         }
         List<ParameterValue> values = parameter.getParameterValues();
         if (attribute.isMultiple()) {
-            return (T) values;
+            return (T) newArrayList(transform(values, VALUE_EXTRACTOR));
         } else {
-            return (T) getFirst(values, null);
+            return (T) VALUE_EXTRACTOR.apply(getFirst(values, null));
         }
     }
 
     @Override
     public <T> void setSingleValue(Attribute attribute, T value) {
-        checkNotNull(attribute, "Attribute of value can not be null");
+        checkArgument(attribute != null, "Attribute of value can not be null");
+        if (value == null) {
+            JpaAttribute jpaAttribute = (JpaAttribute) attribute;
+            proxiedObject.getParameters().remove(jpaAttribute);
+            return;
+        }
         List<ParameterValue<T>> parameterValues = getParameterValuesForSet(attribute);
         ParameterValue<T> parameterValue = getFirst(parameterValues, null);
         if (parameterValue == null) {
@@ -149,9 +169,14 @@ public class DataObjectProxy implements DataObject {
 
     @Override
     public <T> void setMultipleValues(Attribute attribute, List<T> values) {
-        checkNotNull(attribute, "Attribute of value can not be null");
+        checkArgument(attribute != null, "Attribute of value can not be null");
         checkArgument(attribute.isMultiple(),
                 "Attribute [%s, %s] is not multiple", attribute.getId(), attribute.getName());
+        if (values == null || values.isEmpty()) {
+            JpaAttribute jpaAttribute = (JpaAttribute) attribute;
+            proxiedObject.getParameters().remove(jpaAttribute);
+            return;
+        }
         List<ParameterValue<T>> parameterValues = getParameterValuesForSet(attribute);
         Iterator<ParameterValue<T>> parameterIterator = parameterValues.iterator();
         Iterator<T> valueIterator = values.iterator();
@@ -173,7 +198,7 @@ public class DataObjectProxy implements DataObject {
 
     @Override
     public <T> void addMultipleValue(Attribute attribute, T value) {
-        checkNotNull(attribute, "Attribute of value can not be null");
+        checkArgument(attribute != null, "Attribute of value can not be null");
         checkArgument(attribute.isMultiple(),
                 "Attribute [%s, %s] is not multiple", attribute.getId(), attribute.getName());
         List<ParameterValue<T>> parameterValues = getParameterValuesForSet(attribute);
@@ -195,6 +220,30 @@ public class DataObjectProxy implements DataObject {
         while (iterator.hasNext()) {
             iterator.next();
             iterator.remove();
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DataObjectProxy)) {
+            return false;
+        }
+        return proxiedObject.equals(((DataObjectProxy) obj).proxiedObject);
+    }
+
+    @Override
+    public int hashCode() {
+        return proxiedObject.hashCode();
+    }
+
+    protected static class ValueExtractor implements Function<ParameterValue, Object> {
+
+        @Override
+        public Object apply(ParameterValue input) {
+            if (input == null) {
+                return null;
+            }
+            return input.getValue();
         }
     }
 }
