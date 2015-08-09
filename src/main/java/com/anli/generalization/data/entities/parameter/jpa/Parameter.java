@@ -18,7 +18,7 @@ import static javax.persistence.FetchType.EAGER;
 @AttributeOverride(name = "id", column = @Column(name = "parameter_id"))
 public class Parameter extends JpaObject {
 
-    @OneToMany(fetch = EAGER)
+    @OneToMany(fetch = EAGER, orphanRemoval = true)
     @JoinColumn(name = "parameter_id", referencedColumnName = "parameter_id")
     @OrderColumn(name = "parameter_order")
     protected List<ParameterValue> parameterValues;
