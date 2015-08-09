@@ -32,12 +32,12 @@ public class JpaDataObject extends JpaObject {
     @JoinColumn(name = "object_type_id", referencedColumnName = "object_type_id")
     protected JpaObjectType objectType;
 
-    @OneToMany(fetch = LAZY)
+    @OneToMany(fetch = LAZY, orphanRemoval = true)
     @JoinColumn(name = "object_id", referencedColumnName = "object_id")
     @MapKeyJoinColumn(name = "attribute_id", referencedColumnName = "attribute_id")
     protected Map<JpaAttribute, Parameter> parameters;
 
-    @OneToMany(fetch = LAZY)
+    @OneToMany(fetch = LAZY, orphanRemoval = true)
     @JoinColumn(name = "parent_id", referencedColumnName = "object_id")
     @MapKeyJoinColumn(name = "object_type_id", referencedColumnName = "object_type_id")
     protected Map<JpaObjectType, ChildrenGroup> childrenGroups;
@@ -103,5 +103,9 @@ public class JpaDataObject extends JpaObject {
 
     public JpaDataObject getParent() {
         return parent;
+    }
+
+    public void setParent(JpaDataObject parent) {
+        this.parent = parent;
     }
 }
