@@ -49,8 +49,11 @@ public class ChildrenProxyCollection implements Collection<DataObject> {
 
     @Override
     public boolean contains(Object o) {
+        if (o == null || !(o instanceof DataObjectProxy)) {
+            return false;
+        }
         for (ChildrenGroup group : childrenGroups) {
-            if (group.getChildren().contains(o)) {
+            if (group.getChildren().contains(((DataObjectProxy) o).proxiedObject)) {
                 return true;
             }
         }
