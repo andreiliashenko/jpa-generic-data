@@ -84,25 +84,29 @@ public class DataObjectProxy implements DataObject {
 
     @Override
     public DataObject getParent() {
-        return proxyBuilder.getProxy(proxiedObject.getParent());
+        ChildrenGroup parentGroup = proxiedObject.getParentGroup();
+        return parentGroup != null ? proxyBuilder.getProxy(parentGroup.getParent()) : null;
     }
 
     @Override
     public Collection<DataObject> getChildren(ObjectType objectType, boolean hierarchically) {
         checkArgument(objectType != null, "Object type for search cannot be null");
         List<ChildrenGroup> groups = new LinkedList<>();
-        ObjectType currentType = objectType;
-        while (currentType != null) {
-            ChildrenGroup group = proxiedObject.getChildrenGroup((JpaObjectType) currentType);
-            if (group != null) {
-                groups.add(group);
-            }
-            if (!hierarchically) {
-                break;
-            }
-            currentType = currentType.getParent();
-        }
+        collectTypeGroups(objectType, groups, hierarchically);
         return proxyBuilder.getProxyCollection(groups);
+    }
+
+    protected void collectTypeGroups(ObjectType type, List<ChildrenGroup> groups,
+            boolean hierarchically) {
+        ChildrenGroup group = proxiedObject.getChildrenGroup((JpaObjectType) type);
+        if (group != null) {
+            groups.add(group);
+        }
+        if (hierarchically) {
+            for (ObjectType childType : type.getChildren()) {
+                collectTypeGroups(childType, groups, true);
+            }
+        }
     }
 
     @Override
@@ -114,9 +118,10 @@ public class DataObjectProxy implements DataObject {
         if (targetGroup == null) {
             targetGroup = secondaryEntitiesFactory.createChildrenGroup();
             proxiedObject.setChildrenGroup(childType, targetGroup);
+            targetGroup.setParent(proxiedObject);
         }
         targetGroup.getChildren().add(childObject);
-        childObject.setParent(proxiedObject);
+        childObject.setParentGroup(targetGroup);
     }
 
     @Override
@@ -127,9 +132,10 @@ public class DataObjectProxy implements DataObject {
         ChildrenGroup targetGroup = proxiedObject.getChildrenGroup(childType);
         if (targetGroup != null) {
             targetGroup.getChildren().remove(childObject);
-            childObject.setParent(null);
+            childObject.setParentGroup(null);
             if (targetGroup.getChildren().isEmpty()) {
                 proxiedObject.getChildrenGroups().remove(childType);
+                targetGroup.setParent(null);
             }
         }
     }

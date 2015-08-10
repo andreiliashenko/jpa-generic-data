@@ -6,6 +6,7 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -20,11 +21,23 @@ public class ChildrenGroup extends JpaObject {
     @JoinColumn(name = "children_group_id", referencedColumnName = "group_id")
     protected Collection<JpaDataObject> children;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "parent_id", referencedColumnName = "object_id")
+    protected JpaDataObject parent;
+
     public ChildrenGroup() {
         this.children = new HashSet<>();
     }
 
     public Collection<JpaDataObject> getChildren() {
         return children;
+    }
+
+    public JpaDataObject getParent() {
+        return parent;
+    }
+
+    public void setParent(JpaDataObject parent) {
+        this.parent = parent;
     }
 }

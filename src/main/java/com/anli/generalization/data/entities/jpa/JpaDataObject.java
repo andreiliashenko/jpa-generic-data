@@ -9,12 +9,12 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity(name = "DataObject")
@@ -42,11 +42,9 @@ public class JpaDataObject extends JpaObject {
     @MapKeyJoinColumn(name = "object_type_id", referencedColumnName = "object_type_id")
     protected Map<JpaObjectType, ChildrenGroup> childrenGroups;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinTable(name = "children_groups",
-            joinColumns = @JoinColumn(name = "children_group_id", referencedColumnName = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "parent_id", referencedColumnName = "object_id"))
-    protected JpaDataObject parent;
+    @ManyToOne(fetch = EAGER)
+    @JoinColumn(name = "children_group_id", referencedColumnName = "group_id")
+    protected ChildrenGroup parentGroup;
 
     public JpaDataObject() {
         this.childrenGroups = new HashMap<>();
@@ -101,11 +99,11 @@ public class JpaDataObject extends JpaObject {
         getChildrenGroups().put(objectType, childrenGroup);
     }
 
-    public JpaDataObject getParent() {
-        return parent;
+    public ChildrenGroup getParentGroup() {
+        return parentGroup;
     }
 
-    public void setParent(JpaDataObject parent) {
-        this.parent = parent;
+    public void setParentGroup(ChildrenGroup parentGroup) {
+        this.parentGroup = parentGroup;
     }
 }
