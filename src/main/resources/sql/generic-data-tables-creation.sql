@@ -77,11 +77,11 @@ alter table data_objects
 create table parameters (
     parameter_id bigint(20) unsigned not null,
     attribute_id bigint(20) unsigned default null,
-    entity_id bigint(20) unsigned default null,
+    object_id bigint(20) unsigned default null,
     primary key (parameter_id),
     key parameter_to_attribute_idx (attribute_id),
-    key parameter_to_object_idx (entity_id),
-    constraint parameter_to_object foreign key (entity_id) references data_objects (object_id) 
+    key parameter_to_object_idx (object_id),
+    constraint parameter_to_object foreign key (object_id) references data_objects (object_id) 
         on delete set null on update cascade,
     constraint parameter_to_attribute foreign key (attribute_id) references attributes (attribute_id)
         on delete set null on update cascade
