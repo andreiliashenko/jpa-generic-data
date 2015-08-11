@@ -5,11 +5,15 @@ import com.anli.generalization.data.entities.DataObject;
 import com.anli.generalization.data.entities.jpa.ChildrenGroup;
 import com.anli.generalization.data.entities.jpa.JpaDataObject;
 import com.anli.generalization.data.entities.metadata.Attribute;
+import com.anli.generalization.data.entities.metadata.AttributeType;
 import com.anli.generalization.data.entities.metadata.ObjectType;
 import com.anli.generalization.data.entities.metadata.jpa.JpaAttribute;
+import com.anli.generalization.data.entities.metadata.jpa.JpaListEntry;
 import com.anli.generalization.data.entities.metadata.jpa.JpaObjectType;
+import com.anli.generalization.data.entities.parameter.jpa.ListValue;
 import com.anli.generalization.data.entities.parameter.jpa.Parameter;
 import com.anli.generalization.data.entities.parameter.jpa.ParameterValue;
+import com.anli.generalization.data.entities.parameter.jpa.ReferenceValue;
 import com.google.common.base.Function;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -20,6 +24,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.springframework.context.annotation.Scope;
 
+import static com.anli.generalization.data.entities.metadata.AttributeType.LIST;
+import static com.anli.generalization.data.entities.metadata.AttributeType.REFERENCE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.transform;
@@ -169,8 +175,43 @@ public class DataObjectProxy implements DataObject {
             parameterValue = secondaryEntitiesFactory.createParameterValue(attribute.getType());
             parameterValues.add(parameterValue);
         }
-        parameterValue.setValue(value);
+        setParameterValue(attribute, parameterValue, value);
         clearValuesTail(parameterValues.listIterator(1));
+    }
+
+    protected <T> void setParameterValue(Attribute attribute, ParameterValue<T> parameterValue, T value) {
+        AttributeType attributeType = attribute.getType();
+        if (REFERENCE.equals(attributeType)) {
+            setReferenceValue(attribute, (ReferenceValue) parameterValue,
+                    ((DataObjectProxy) value).getProxiedObject());
+        } else if (LIST.equals(attributeType)) {
+            setListValue(attribute, (ListValue) parameterValue, (JpaListEntry) value);
+        } else {
+            parameterValue.setValue(value);
+        }
+    }
+
+    protected void setReferenceValue(Attribute attribute, ReferenceValue referenceValue,
+            JpaDataObject reference) {
+        ObjectType type = reference.getObjectType();
+        ObjectType expectedType = attribute.getReferenceType();
+        if (expectedType != null) {
+            boolean match = false;
+            while (!match && type != null) {
+                if (expectedType.equals(type)) {
+                    match = true;
+                }
+                type = type.getParent();
+            }
+            checkArgument(match, "Referenced object does not belong to attribute reference type");
+        }
+        referenceValue.setValue(reference);
+    }
+
+    protected void setListValue(Attribute attribute, ListValue listValue, JpaListEntry listEntry) {
+        checkArgument(attribute.getListEntries().contains(listEntry),
+                "List entry does not belong to attribute");
+        listValue.setValue(listEntry);
     }
 
     @Override
@@ -189,7 +230,7 @@ public class DataObjectProxy implements DataObject {
         while (parameterIterator.hasNext() && valueIterator.hasNext()) {
             ParameterValue<T> parameterValue = parameterIterator.next();
             T value = valueIterator.next();
-            parameterValue.setValue(value);
+            setParameterValue(attribute, parameterValue, value);
         }
         if (parameterIterator.hasNext()) {
             clearValuesTail(parameterIterator);
@@ -197,7 +238,7 @@ public class DataObjectProxy implements DataObject {
         while (valueIterator.hasNext()) {
             ParameterValue<T> newValue =
                     secondaryEntitiesFactory.createParameterValue(attribute.getType());
-            newValue.setValue(valueIterator.next());
+            setParameterValue(attribute, newValue, valueIterator.next());
             parameterValues.add(newValue);
         }
     }
@@ -207,10 +248,11 @@ public class DataObjectProxy implements DataObject {
         checkArgument(attribute != null, "Attribute of value can not be null");
         checkArgument(attribute.isMultiple(),
                 "Attribute [%s, %s] is not multiple", attribute.getId(), attribute.getName());
+        checkArgument(value != null, "Value for addition can not be null");
         List<ParameterValue<T>> parameterValues = getParameterValuesForSet(attribute);
         ParameterValue<T> parameterValue =
                 secondaryEntitiesFactory.createParameterValue(attribute.getType());
-        parameterValue.setValue(value);
+        setParameterValue(attribute, parameterValue, value);
         parameterValues.add(parameterValue);
     }
 
