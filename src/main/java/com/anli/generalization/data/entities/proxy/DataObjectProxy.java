@@ -36,10 +36,9 @@ import static java.util.Collections.emptyList;
 @Scope("prototype")
 public class DataObjectProxy implements DataObject {
 
-    protected static final ValueExtractor VALUE_EXTRACTOR = new ValueExtractor();
-
     protected final DataObjectProxyBuilder proxyBuilder;
     protected final SecondaryEntitesFactory secondaryEntitiesFactory;
+    protected final ValueExtractor valueExtractor;
 
     protected JpaDataObject proxiedObject;
 
@@ -48,6 +47,7 @@ public class DataObjectProxy implements DataObject {
             SecondaryEntitesFactory secondaryEntitiesFactory) {
         this.proxyBuilder = proxyBuilder;
         this.secondaryEntitiesFactory = secondaryEntitiesFactory;
+        this.valueExtractor = new ValueExtractor();
     }
 
     public void setProxiedObject(JpaDataObject proxiedObject) {
@@ -155,9 +155,9 @@ public class DataObjectProxy implements DataObject {
         }
         List<ParameterValue> values = parameter.getParameterValues();
         if (attribute.isMultiple()) {
-            return (T) newArrayList(transform(values, VALUE_EXTRACTOR));
+            return (T) newArrayList(transform(values, valueExtractor));
         } else {
-            return (T) VALUE_EXTRACTOR.apply(getFirst(values, null));
+            return (T) valueExtractor.apply(getFirst(values, null));
         }
     }
 
@@ -284,14 +284,18 @@ public class DataObjectProxy implements DataObject {
         return proxiedObject.hashCode();
     }
 
-    protected static class ValueExtractor implements Function<ParameterValue, Object> {
+    protected class ValueExtractor implements Function<ParameterValue, Object> {
 
         @Override
         public Object apply(ParameterValue input) {
             if (input == null) {
                 return null;
             }
-            return input.getValue();
+            Object value = input.getValue();
+            if (value != null && value instanceof JpaDataObject) {
+                value = proxyBuilder.getProxy((JpaDataObject) value);
+            }
+            return value;
         }
     }
 }
