@@ -39,6 +39,7 @@ import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -1019,18 +1020,147 @@ public class DataObjectParametersTest {
 
     @Test
     @InSequence(14)
-    public void testAddMultipleValue_shouldUpdateMultipleParameter() {
+    public void testAddMultipleValue_shouldUpdateMultipleParameter() throws Exception {
+        objectHelper.createObject(1608, "MultipleParamObject", null, bi(TYPE_A), null);
+        objectHelper.createParameter(1609, bi(M_DATE_ATTR), bi(1608));
+        objectHelper.createDateValue(1610, 1439539457L);
+        objectHelper.linkValuesToParameter(1609, 1610);
+        objectHelper.createParameter(1611, bi(M_REF_ATTR), bi(1608));
+        objectHelper.createReferenceValue(1612, bi(OBJECT_A));
+        objectHelper.linkValuesToParameter(1611, 1612);
+        objectHelper.createParameter(1613, bi(M_LIST_ATTR), bi(1608));
+        objectHelper.createListValue(1614, bi(M_LIST_A));
+        objectHelper.createListValue(1615, bi(M_LIST_B));
+        objectHelper.linkValuesToParameter(1613, 1614, 1615);
 
+        transaction.begin();
+
+        Attribute text = attrProvider.getById(bi(M_TEXT_ATTR));
+        Attribute date = attrProvider.getById(bi(M_DATE_ATTR));
+        Attribute ref = attrProvider.getById(bi(M_REF_ATTR));
+        Attribute list = attrProvider.getById(bi(M_LIST_ATTR));
+        DataObject objectA = objectProvider.getById((bi(OBJECT_A)));
+        ListEntry listEntryC = listProvider.getById(bi(M_LIST_C));
+
+        DataObject dataObject = objectProvider.getById(bi(1608));
+        dataObject.addMultipleValue(text, "Added Text");
+        dataObject.addMultipleValue(date, new DateTime(1439539797));
+        dataObject.addMultipleValue(ref, objectA);
+        dataObject.addMultipleValue(list, listEntryC);
+
+        transaction.commit();
+
+        Collection<BigInteger> parameters = objectHelper.readParametersByObject(bi(1608));
+
+        assertEquals(4, parameters.size());
+        assertTrue(parameters.contains(bi(1609)));
+        assertTrue(parameters.contains(bi(1611)));
+        assertTrue(parameters.contains(bi(1613)));
+
+        ArrayList<BigInteger> parametersCopy = new ArrayList<>(parameters);
+        parametersCopy.removeAll(asList(bi(1609), asList(1611), bi(1613)));
+        BigInteger textParameterId = parametersCopy.iterator().next();
+
+        assertNotNull(textParameterId);
+
+        Map<String, Object> textParameter = objectHelper.readParameter(textParameterId);
+        Map<String, Object> dateParameter = objectHelper.readParameter(bi(1609));
+        Map<String, Object> refParameter = objectHelper.readParameter(bi(1611));
+        Map<String, Object> listParameter = objectHelper.readParameter(bi(1613));
+        List<BigInteger> textValues = objectHelper.readValuesByParameter(textParameterId);
+        List<BigInteger> dateValues = objectHelper.readValuesByParameter(bi(1609));
+        List<BigInteger> refValues = objectHelper.readValuesByParameter(bi(1611));
+        List<BigInteger> listValues = objectHelper.readValuesByParameter(bi(1613));
+
+        assertEquals(bi(M_TEXT_ATTR), textParameter.get("attribute"));
+        assertEquals(bi(M_DATE_ATTR), dateParameter.get("attribute"));
+        assertEquals(bi(M_REF_ATTR), refParameter.get("attribute"));
+        assertEquals(bi(M_LIST_ATTR), listParameter.get("attribute"));
+
+        assertEquals(1, textValues.size());
+        assertEquals(2, dateValues.size());
+        assertEquals(2, refValues.size());
+        assertEquals(3, listValues.size());
+
+        assertEquals(bi(1610), dateValues.get(0));
+        assertEquals(bi(1612), refValues.get(0));
+        assertEquals(bi(1614), listValues.get(0));
+        assertEquals(bi(1615), listValues.get(1));
+
+        Map<String, Object> firstText = objectHelper.readValue(textValues.iterator().next());
+        Map<String, Object> firstDate = objectHelper.readValue(dateValues.get(0));
+        Map<String, Object> secondDate = objectHelper.readValue(dateValues.get(1));
+        Map<String, Object> firstRef = objectHelper.readValue(refValues.get(0));
+        Map<String, Object> secondRef = objectHelper.readValue(refValues.get(1));
+        Map<String, Object> firstList = objectHelper.readValue(listValues.get(0));
+        Map<String, Object> secondList = objectHelper.readValue(listValues.get(1));
+        Map<String, Object> thirdList = objectHelper.readValue(listValues.get(2));
+
+        assertEquals(0, firstText.get("type"));
+        assertEquals("Added Text", firstText.get("text"));
+        assertNull(firstText.get("date"));
+        assertNull(firstText.get("reference"));
+        assertNull(firstText.get("listEntry"));
+        assertEquals(0, firstText.get("order"));
+
+        assertEquals(1, firstDate.get("type"));
+        assertNull(firstDate.get("text"));
+        assertEquals(bi(1439539457), firstDate.get("date"));
+        assertNull(firstDate.get("reference"));
+        assertNull(firstDate.get("listEntry"));
+        assertEquals(0, firstDate.get("order"));
+
+        assertEquals(1, secondDate.get("type"));
+        assertNull(secondDate.get("text"));
+        assertEquals(bi(1439539797), secondDate.get("date"));
+        assertNull(secondDate.get("reference"));
+        assertNull(secondDate.get("listEntry"));
+        assertEquals(1, secondDate.get("order"));
+
+        assertEquals(2, firstRef.get("type"));
+        assertNull(firstRef.get("text"));
+        assertNull(firstRef.get("date"));
+        assertEquals(bi(OBJECT_A), firstRef.get("reference"));
+        assertNull(firstRef.get("listEntry"));
+        assertEquals(0, firstRef.get("order"));
+
+        assertEquals(2, secondRef.get("type"));
+        assertNull(secondRef.get("text"));
+        assertNull(secondRef.get("date"));
+        assertEquals(bi(OBJECT_A), firstRef.get("reference"));
+        assertNull(secondRef.get("listEntry"));
+        assertEquals(1, secondRef.get("order"));
+
+        assertEquals(3, firstList.get("type"));
+        assertNull(firstList.get("text"));
+        assertNull(firstList.get("date"));
+        assertNull(firstList.get("reference"));
+        assertEquals(bi(M_LIST_A), firstList.get("listEntry"));
+        assertEquals(0, firstList.get("order"));
+
+        assertEquals(3, secondList.get("type"));
+        assertNull(secondList.get("text"));
+        assertNull(secondList.get("date"));
+        assertNull(secondList.get("reference"));
+        assertEquals(bi(M_LIST_B), secondList.get("listEntry"));
+        assertEquals(1, secondList.get("order"));
+
+        assertEquals(3, thirdList.get("type"));
+        assertNull(thirdList.get("text"));
+        assertNull(thirdList.get("date"));
+        assertNull(thirdList.get("reference"));
+        assertEquals(bi(M_LIST_C), thirdList.get("listEntry"));
+        assertEquals(2, thirdList.get("order"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     @InSequence(15)
     public void testAddMultipleValue_shouldCheckNullAttribute() throws Exception {
-        objectHelper.createObject(N, "Multiple param object", null, bi(TYPE_A), null);
+        objectHelper.createObject(1616, "Multiple param object", null, bi(TYPE_A), null);
 
         transaction.begin();
 
-        DataObject object = objectProvider.getById(bi(N));
+        DataObject object = objectProvider.getById(bi(1616));
         object.addMultipleValue(null, "Value");
 
         transaction.commit();
@@ -1039,12 +1169,12 @@ public class DataObjectParametersTest {
     @Test(expected = IllegalArgumentException.class)
     @InSequence(16)
     public void testAddMultipleValue_shouldCheckSingleAttribute() throws Exception {
-        objectHelper.createObject(N, "Multiple param object", null, bi(TYPE_A), null);
+        objectHelper.createObject(1617, "Multiple param object", null, bi(TYPE_A), null);
 
         transaction.begin();
 
         Attribute singleAttribute = attrProvider.getById(bi(S_DATE_ATTR));
-        DataObject object = objectProvider.getById(bi(N));
+        DataObject object = objectProvider.getById(bi(1617));
         object.addMultipleValue(singleAttribute, new DateTime(1439499213));
 
         transaction.commit();
@@ -1053,44 +1183,292 @@ public class DataObjectParametersTest {
     @Test(expected = IllegalArgumentException.class)
     @InSequence(17)
     public void testAddMultipleValue_shouldCheckNullValue() throws Exception {
-        objectHelper.createObject(N, "Multiple param object", null, bi(TYPE_A), null);
+        objectHelper.createObject(1618, "Multiple param object", null, bi(TYPE_A), null);
 
         transaction.begin();
 
         Attribute attribute = attrProvider.getById(bi(M_REF_ATTR));
-        DataObject object = objectProvider.getById(bi(N));
+        DataObject object = objectProvider.getById(bi(1618));
         object.addMultipleValue(attribute, null);
 
         transaction.commit();
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     @InSequence(18)
-    public void testUpdate_shouldCheckInvalidListEntries() {
+    public void testUpdate_shouldCheckInvalidListEntries() throws Exception {
+        objectHelper.createObject(1619, "List Object", null, bi(TYPE_A), null);
 
+        transaction.begin();
+
+        Attribute attribute = attrProvider.getById(bi(S_LIST_ATTR));
+        ListEntry invalidEntry = listProvider.getById(bi(M_LIST_ATTR));
+
+        DataObject dataObject = objectProvider.getById(bi(1619));
+        dataObject.setSingleValue(attribute, invalidEntry);
+
+        transaction.commit();
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     @InSequence(19)
-    public void testUpdate_shouldCheckInvalidReferenceTypes() {
+    public void testUpdate_shouldCheckInvalidReferenceTypes() throws Exception {
+        objectHelper.createObject(1620, "Ref Object", null, bi(TYPE_A), null);
 
+        transaction.begin();
+
+        Attribute attribute = attrProvider.getById(bi(M_R_REF_ATTR));
+        DataObject validReference = objectProvider.getById(bi(OBJECT_C));
+        DataObject invalidReference = objectProvider.getById(bi(OBJECT_A));
+
+        DataObject dataObject = objectProvider.getById(bi(1620));
+        try {
+            dataObject.addMultipleValue(attribute, OBJECT_C);
+        } catch (IllegalArgumentException ex) {
+            fail(ex.toString());
+        }
+        dataObject.setMultipleValues(attribute, asList(validReference, invalidReference));
+
+        transaction.commit();
     }
 
     @Test
     @InSequence(20)
-    public void testUpdate_shouldRollbackUpdate() {
+    public void testUpdate_shouldRollbackUpdate() throws Exception {
+        objectHelper.createObject(1621, "Rollback Object", null, bi(TYPE_A), null);
+        objectHelper.createParameter(1622, bi(S_TEXT_ATTR), bi(1621));
+        objectHelper.createTextValue(1623, "Initial Text");
+        objectHelper.linkValuesToParameter(1622, 1623);
+        objectHelper.createParameter(1624, bi(S_REF_ATTR), bi(1621));
+        objectHelper.createReferenceValue(1625, bi(OBJECT_B));
+        objectHelper.linkValuesToParameter(1624, 1625);
+        objectHelper.createParameter(1626, bi(M_LIST_ATTR), bi(1621));
+        objectHelper.createListValue(1627, bi(M_LIST_C));
+        objectHelper.linkValuesToParameter(1626, 1627);
 
+        transaction.begin();
+
+        Attribute text = attrProvider.getById(bi(S_TEXT_ATTR));
+        Attribute date = attrProvider.getById(bi(M_DATE_ATTR));
+        Attribute reference = attrProvider.getById(bi(S_REF_ATTR));
+        Attribute list = attrProvider.getById(bi(M_LIST_ATTR));
+        ListEntry entryA = listProvider.getById(bi(M_LIST_A));
+        ListEntry entryB = listProvider.getById(bi(M_LIST_B));
+
+        DataObject dataObject = objectProvider.getById(bi(1621));
+        dataObject.setSingleValue(text, "New Text");
+        dataObject.addMultipleValue(date, new DateTime(1439542677));
+        dataObject.setSingleValue(reference, null);
+        dataObject.setMultipleValues(list, asList(entryB, entryA));
+
+        transaction.rollback();
+
+        Collection<BigInteger> parameters = objectHelper.readParametersByObject(bi(1621));
+        Map<String, Object> textParameter = objectHelper.readParameter(bi(1622));
+        Map<String, Object> refParameter = objectHelper.readParameter(bi(1624));
+        Map<String, Object> listParameter = objectHelper.readParameter(bi(1626));
+        List<BigInteger> textValues = objectHelper.readValuesByParameter(bi(1622));
+        List<BigInteger> refValues = objectHelper.readValuesByParameter(bi(1624));
+        List<BigInteger> listValues = objectHelper.readValuesByParameter(bi(1626));
+        Map<String, Object> textValue = objectHelper.readValue(bi(1623));
+        Map<String, Object> refValue = objectHelper.readValue(bi(1625));
+        Map<String, Object> listValue = objectHelper.readValue(bi(1627));
+
+        assertEquals(3, parameters.size());
+        assertTrue(parameters.contains(bi(1622)));
+        assertTrue(parameters.contains(bi(1624)));
+        assertTrue(parameters.contains(bi(1626)));
+
+        assertEquals(bi(S_TEXT_ATTR), textParameter.get("attribute"));
+        assertEquals(bi(S_REF_ATTR), refParameter.get("attribute"));
+        assertEquals(bi(M_LIST_ATTR), listParameter.get("attribute"));
+
+        assertEquals(1, textValues.size());
+        assertEquals(1, refValues.size());
+        assertEquals(1, listValues.size());
+
+        assertEquals(bi(1623), textValues.iterator().next());
+        assertEquals(bi(1625), refValues.iterator().next());
+        assertEquals(bi(1627), listValues.iterator().next());
+
+        assertEquals(0, textValue.get("type"));
+        assertEquals("Initial Text", textValue.get("text"));
+        assertNull(textValue.get("date"));
+        assertNull(textValue.get("reference"));
+        assertNull(textValue.get("listEntry"));
+        assertEquals(0, textValue.get("order"));
+
+        assertEquals(2, refValue.get("type"));
+        assertNull(refValue.get("text"));
+        assertNull(refValue.get("date"));
+        assertEquals(bi(OBJECT_B), refValue.get("reference"));
+        assertNull(refValue.get("listEntry"));
+        assertEquals(0, refValue.get("order"));
+
+        assertEquals(3, listValue.get("type"));
+        assertNull(listValue.get("text"));
+        assertNull(listValue.get("date"));
+        assertNull(listValue.get("reference"));
+        assertEquals(bi(M_LIST_C), listValue.get("listEntry"));
+        assertEquals(0, listValue.get("order"));
     }
 
     @Test
     @InSequence(21)
-    public void testRemove_shouldRemoveParameters() {
+    public void testRemove_shouldRemoveParameters() throws Exception {
+        objectHelper.createObject(1628, "To Be Removed", null, bi(TYPE_A), null);
+        objectHelper.createParameter(1629, bi(S_TEXT_ATTR), bi(1628));
+        objectHelper.createTextValue(1630, "Initial Text");
+        objectHelper.linkValuesToParameter(1629, 1630);
+        objectHelper.createParameter(1631, bi(M_DATE_ATTR), bi(1628));
+        objectHelper.createDateValue(1632, 1439543383L);
+        objectHelper.createDateValue(1633, 1439543388L);
+        objectHelper.linkValuesToParameter(1631, 1632, 1633);
+        objectHelper.createParameter(1634, bi(S_REF_ATTR), bi(1628));
+        objectHelper.createReferenceValue(1635, bi(OBJECT_A));
+        objectHelper.linkValuesToParameter(1634, 1635);
+        objectHelper.createParameter(1636, bi(M_LIST_ATTR), bi(1628));
+        objectHelper.createListValue(1637, bi(M_LIST_C));
+        objectHelper.linkValuesToParameter(1636, 1637);
+
+        transaction.begin();
+
+        DataObject toRemove = objectProvider.getById(bi(1628));
+        objectProvider.remove(toRemove);
+
+        transaction.commit();
+
+        assertNull(objectHelper.readObject(bi(1628)));
+
+        Collection<BigInteger> parameters = objectHelper.readParametersByObject(bi(1628));
+        Map<String, Object> textParameter = objectHelper.readParameter(bi(1629));
+        Map<String, Object> dateParameter = objectHelper.readParameter(bi(1631));
+        Map<String, Object> refParameter = objectHelper.readParameter(bi(1634));
+        Map<String, Object> listParameter = objectHelper.readParameter(bi(1636));
+        List<BigInteger> textValues = objectHelper.readValuesByParameter(bi(1629));
+        List<BigInteger> dateValues = objectHelper.readValuesByParameter(bi(1631));
+        List<BigInteger> refValues = objectHelper.readValuesByParameter(bi(1634));
+        List<BigInteger> listValues = objectHelper.readValuesByParameter(bi(1636));
+        Map<String, Object> textValue = objectHelper.readValue(bi(1630));
+        Map<String, Object> firstDateValue = objectHelper.readValue(bi(1632));
+        Map<String, Object> secondDateValue = objectHelper.readValue(bi(1633));
+        Map<String, Object> refValue = objectHelper.readValue(bi(1635));
+        Map<String, Object> listValue = objectHelper.readValue(bi(1637));
+
+        assertTrue(parameters.isEmpty());
+        assertNull(textParameter);
+        assertNull(dateParameter);
+        assertNull(refParameter);
+        assertNull(listParameter);
+        assertTrue(textValues.isEmpty());
+        assertTrue(dateValues.isEmpty());
+        assertTrue(refValues.isEmpty());
+        assertTrue(listValues.isEmpty());
+        assertNull(textValue);
+        assertNull(firstDateValue);
+        assertNull(secondDateValue);
+        assertNull(refValue);
+        assertNull(listValue);
 
     }
 
     @Test
     @InSequence(22)
-    public void testRemove_shouldRollbackRemove() {
+    public void testRemove_shouldRollbackRemove() throws Exception {
+        objectHelper.createObject(1638, "To Be Removed", null, bi(TYPE_A), null);
+        objectHelper.createParameter(1639, bi(S_TEXT_ATTR), bi(1638));
+        objectHelper.createTextValue(1640, "Initial Text");
+        objectHelper.linkValuesToParameter(1639, 1640);
+        objectHelper.createParameter(1641, bi(M_DATE_ATTR), bi(1638));
+        objectHelper.createDateValue(1642, 1439543383L);
+        objectHelper.createDateValue(1643, 1439543388L);
+        objectHelper.linkValuesToParameter(1641, 1642, 1643);
+        objectHelper.createParameter(1644, bi(S_REF_ATTR), bi(1638));
+        objectHelper.createReferenceValue(1645, bi(OBJECT_A));
+        objectHelper.linkValuesToParameter(1644, 1645);
+        objectHelper.createParameter(1646, bi(M_LIST_ATTR), bi(1638));
+        objectHelper.createListValue(1647, bi(M_LIST_C));
+        objectHelper.linkValuesToParameter(1646, 1647);
 
+        transaction.begin();
+
+        DataObject toRemove = objectProvider.getById(bi(1638));
+        objectProvider.remove(toRemove);
+
+        transaction.rollback();
+
+        assertNotNull(objectHelper.readObject(bi(1638)));
+
+        Collection<BigInteger> parameters = objectHelper.readParametersByObject(bi(1638));
+        Map<String, Object> textParameter = objectHelper.readParameter(bi(1639));
+        Map<String, Object> dateParameter = objectHelper.readParameter(bi(1641));
+        Map<String, Object> refParameter = objectHelper.readParameter(bi(1644));
+        Map<String, Object> listParameter = objectHelper.readParameter(bi(1646));
+        List<BigInteger> textValues = objectHelper.readValuesByParameter(bi(1639));
+        List<BigInteger> dateValues = objectHelper.readValuesByParameter(bi(1641));
+        List<BigInteger> refValues = objectHelper.readValuesByParameter(bi(1644));
+        List<BigInteger> listValues = objectHelper.readValuesByParameter(bi(1646));
+        Map<String, Object> textValue = objectHelper.readValue(bi(1640));
+        Map<String, Object> firstDateValue = objectHelper.readValue(bi(1642));
+        Map<String, Object> secondDateValue = objectHelper.readValue(bi(1643));
+        Map<String, Object> refValue = objectHelper.readValue(bi(1645));
+        Map<String, Object> listValue = objectHelper.readValue(bi(1647));
+
+        assertEquals(4, parameters.size());
+        assertTrue(parameters.contains(bi(1639)));
+        assertTrue(parameters.contains(bi(1641)));
+        assertTrue(parameters.contains(bi(1644)));
+        assertTrue(parameters.contains(bi(1646)));
+
+        assertEquals(bi(S_TEXT_ATTR), textParameter.get("attribute"));
+        assertEquals(bi(M_DATE_ATTR), dateParameter.get("attribute"));
+        assertEquals(bi(S_REF_ATTR), refParameter.get("attribute"));
+        assertEquals(bi(M_LIST_ATTR), listParameter.get("attribute"));
+
+        assertEquals(1, textValues.size());
+        assertEquals(2, dateValues.size());
+        assertEquals(1, refValues.size());
+        assertEquals(1, listValues.size());
+
+        assertEquals(bi(1640), textValues.iterator().next());
+        assertEquals(bi(1642), dateValues.get(0));
+        assertEquals(bi(1643), dateValues.get(1));
+        assertEquals(bi(1645), refValues.iterator().next());
+        assertEquals(bi(1647), listValues.iterator().next());
+
+        assertEquals(0, textValue.get("type"));
+        assertEquals("Initial Text", textValue.get("text"));
+        assertNull(textValue.get("date"));
+        assertNull(textValue.get("reference"));
+        assertNull(textValue.get("listEntry"));
+        assertEquals(0, textValue.get("order"));
+
+        assertEquals(1, firstDateValue.get("type"));
+        assertNull(firstDateValue.get("text"));
+        assertEquals(bi(1439543383), firstDateValue.get("date"));
+        assertNull(firstDateValue.get("reference"));
+        assertNull(firstDateValue.get("listEntry"));
+        assertEquals(0, firstDateValue.get("order"));
+
+        assertEquals(1, secondDateValue.get("type"));
+        assertNull(secondDateValue.get("text"));
+        assertEquals(bi(1439543388L), secondDateValue.get("date"));
+        assertNull(secondDateValue.get("reference"));
+        assertNull(secondDateValue.get("listEntry"));
+        assertEquals(1, secondDateValue.get("order"));
+
+        assertEquals(2, refValue.get("type"));
+        assertNull(refValue.get("text"));
+        assertNull(refValue.get("date"));
+        assertEquals(bi(OBJECT_A), refValue.get("reference"));
+        assertNull(refValue.get("listEntry"));
+        assertEquals(0, refValue.get("order"));
+
+        assertEquals(3, listValue.get("type"));
+        assertNull(listValue.get("text"));
+        assertNull(listValue.get("date"));
+        assertNull(listValue.get("reference"));
+        assertEquals(bi(M_LIST_C), listValue.get("listEntry"));
+        assertEquals(0, listValue.get("order"));
     }
 }
