@@ -2,7 +2,6 @@ package com.anli.generalization.data.utils;
 
 import java.io.File;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
@@ -18,7 +17,6 @@ public class CommonDeployment {
                 .addAsResource("spring/jpa-generic-data-app.xml", "spring/jpa-generic-data-app.xml");
         return ShrinkWrap.create(WebArchive.class, "jpa-generic-data-test.war")
                 .addAsLibrary(testArchive)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsLibraries(dependencies);
     }
 }

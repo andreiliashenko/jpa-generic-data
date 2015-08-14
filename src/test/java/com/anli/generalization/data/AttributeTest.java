@@ -14,7 +14,6 @@ import com.anli.generalization.data.utils.ObjectTypeHelper;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -31,6 +30,8 @@ import static com.anli.generalization.data.entities.metadata.AttributeType.LIST;
 import static com.anli.generalization.data.entities.metadata.AttributeType.REFERENCE;
 import static com.anli.generalization.data.entities.metadata.AttributeType.TEXT;
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
+import static com.anli.generalization.data.utils.JndiUtils.getDataSource;
+import static com.anli.generalization.data.utils.JndiUtils.getTransaction;
 import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,10 +47,8 @@ public class AttributeTest {
         return getDeployment();
     }
 
-    @Resource(lookup = "java:/jdbc/integration_testing")
     private DataSource dataSource;
 
-    @Resource
     private UserTransaction transaction;
 
     private ObjectTypeHelper objectTypeHelper;
@@ -62,6 +61,8 @@ public class AttributeTest {
 
     @Before
     public void setUp() {
+        dataSource = getDataSource();
+        transaction = getTransaction();
         objectTypeHelper = new ObjectTypeHelper(dataSource);
         listEntryHelper = new ListEntryHelper(dataSource);
         attributeHelper = new AttributeHelper(dataSource);

@@ -21,6 +21,8 @@ import org.junit.runner.RunWith;
 import org.springframework.transaction.IllegalTransactionStateException;
 
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
+import static com.anli.generalization.data.utils.JndiUtils.getDataSource;
+import static com.anli.generalization.data.utils.JndiUtils.getTransaction;
 import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,10 +39,8 @@ public class ObjectTypeTest {
         return getDeployment();
     }
 
-    @Resource(lookup = "java:/jdbc/integration_testing")
     private DataSource dataSource;
 
-    @Resource
     private UserTransaction transaction;
 
     private ObjectTypeHelper helper;
@@ -49,6 +49,8 @@ public class ObjectTypeTest {
 
     @Before
     public void setUp() {
+        dataSource = getDataSource();
+        transaction = getTransaction();
         helper = new ObjectTypeHelper(dataSource);
         provider = JpaProviderFactory.getInstance().getObjectTypeProvider();
     }

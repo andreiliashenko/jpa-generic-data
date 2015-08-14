@@ -35,6 +35,8 @@ import static com.anli.generalization.data.entities.metadata.AttributeType.LIST;
 import static com.anli.generalization.data.entities.metadata.AttributeType.REFERENCE;
 import static com.anli.generalization.data.entities.metadata.AttributeType.TEXT;
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
+import static com.anli.generalization.data.utils.JndiUtils.getDataSource;
+import static com.anli.generalization.data.utils.JndiUtils.getTransaction;
 import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -77,10 +79,9 @@ public class DataObjectParametersTest {
     private static final long M_LIST_A = 1520;
     private static final long M_LIST_B = 1521;
     private static final long M_LIST_C = 1522;
-    @Resource(lookup = "java:/jdbc/integration_testing")
+
     private DataSource dataSource;
 
-    @Resource
     private UserTransaction transaction;
 
     private ObjectTypeHelper typeHelper;
@@ -95,6 +96,8 @@ public class DataObjectParametersTest {
 
     @Before
     public void setUp() {
+        dataSource = getDataSource();
+        transaction = getTransaction();
         typeHelper = new ObjectTypeHelper(dataSource);
         attrHelper = new AttributeHelper(dataSource);
         listHelper = new ListEntryHelper(dataSource);

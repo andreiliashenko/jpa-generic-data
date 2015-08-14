@@ -27,6 +27,8 @@ import static com.anli.generalization.data.entities.metadata.AttributeType.LIST;
 import static com.anli.generalization.data.entities.metadata.AttributeType.REFERENCE;
 import static com.anli.generalization.data.entities.metadata.AttributeType.TEXT;
 import static com.anli.generalization.data.utils.CommonDeployment.getDeployment;
+import static com.anli.generalization.data.utils.JndiUtils.getDataSource;
+import static com.anli.generalization.data.utils.JndiUtils.getTransaction;
 import static com.anli.generalization.data.utils.ValueFactory.bi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -41,10 +43,8 @@ public class ObjectTypeAttributeTest {
         return getDeployment();
     }
 
-    @Resource(lookup = "java:/jdbc/integration_testing")
     private DataSource dataSource;
 
-    @Resource
     private UserTransaction transaction;
 
     private ObjectTypeHelper typeHelper;
@@ -55,6 +55,8 @@ public class ObjectTypeAttributeTest {
 
     @Before
     public void setUp() {
+        dataSource = getDataSource();
+        transaction = getTransaction();
         typeHelper = new ObjectTypeHelper(dataSource);
         attrHelper = new AttributeHelper(dataSource);
         typeProvider = JpaProviderFactory.getInstance().getObjectTypeProvider();
