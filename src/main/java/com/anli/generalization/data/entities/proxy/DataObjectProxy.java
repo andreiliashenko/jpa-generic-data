@@ -260,6 +260,7 @@ public class DataObjectProxy implements DataObject {
         Parameter parameter = proxiedObject.getParameter((JpaAttribute) attribute);
         if (parameter == null) {
             parameter = secondaryEntitiesFactory.createParameter();
+            proxiedObject.setParameter((JpaAttribute) attribute, parameter);
         }
         return parameter.getParameterValues();
     }
