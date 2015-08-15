@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -670,7 +669,7 @@ public class DataObjectParametersTest {
         dataObject.setMultipleValues(date, asList(new DateTime(1439409164L), new DateTime(1439493862L),
                 new DateTime(1439493881L)));
         dataObject.setMultipleValues(ref, asList(objectA, objectB));
-        dataObject.setMultipleValues(list, asList(emptyList()));
+        dataObject.setMultipleValues(list, emptyList());
         dataObject.setMultipleValues(restRef, null);
 
         transaction.commit();
@@ -1061,7 +1060,7 @@ public class DataObjectParametersTest {
         assertTrue(parameters.contains(bi(1613)));
 
         ArrayList<BigInteger> parametersCopy = new ArrayList<>(parameters);
-        parametersCopy.removeAll(asList(bi(1609), asList(1611), bi(1613)));
+        parametersCopy.removeAll(asList(bi(1609), bi(1611), bi(1613)));
         BigInteger textParameterId = parametersCopy.iterator().next();
 
         assertNotNull(textParameterId);
@@ -1205,7 +1204,7 @@ public class DataObjectParametersTest {
         transaction.begin();
 
         Attribute attribute = attrProvider.getById(bi(S_LIST_ATTR));
-        ListEntry invalidEntry = listProvider.getById(bi(M_LIST_ATTR));
+        ListEntry invalidEntry = listProvider.getById(bi(M_LIST_A));
 
         DataObject dataObject = objectProvider.getById(bi(1619));
         dataObject.setSingleValue(attribute, invalidEntry);
@@ -1226,7 +1225,7 @@ public class DataObjectParametersTest {
 
         DataObject dataObject = objectProvider.getById(bi(1620));
         try {
-            dataObject.addMultipleValue(attribute, OBJECT_C);
+            dataObject.addMultipleValue(attribute, validReference);
         } catch (IllegalArgumentException ex) {
             fail(ex.toString());
         }
