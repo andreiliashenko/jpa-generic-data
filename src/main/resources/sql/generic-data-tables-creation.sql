@@ -91,7 +91,7 @@ create table parameter_values (
     value_id bigint(20) unsigned not null,
     type int(1) unsigned default null,
     text_value varchar(500) default null,
-    date_value timestamp null default null,
+    date_value datetime(3) null default null,
     reference_id bigint(20) unsigned default null,
     list_entry_id bigint(20) unsigned default null,
     parameter_id bigint(20) unsigned default null,
